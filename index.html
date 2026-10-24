@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="description" content="A personal dashboard for your favorite links, tools, and resources." />
+  <title>My Dashboard</title>
+
+  <!-- Icons are loaded from a CDN. The dashboard itself does not require a backend. -->
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --surface: #111a2d;
+      --surface-raised: #172238;
+      --surface-hover: #202e47;
+      --text: #edf3ff;
+      --muted: #9baac2;
+      --border: #2a3953;
+      --accent: #a5c8ff;
+      --accent-strong: #76aaff;
+      --accent-ink: #10213d;
+      --danger: #ffb4b4;
+      --shadow: 0 16px 40px rgba(0, 0, 0, .20);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 12% 0%, rgba(70, 111, 180, .17), transparent 38rem),
+        radial-gradient(ellipse at 100% 15%, rgba(92, 69, 160, .10), transparent 34rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+
+    .shell {
+      width: min(1120px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 34px 0 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: #17345f;
+      background: linear-gradient(145deg, #d9e8ff, #91baff);
+      border-radius: 15px;
+      box-shadow: 0 8px 24px rgba(118, 170, 255, .15);
+    }
+
+    .brand-mark svg { width: 23px; height: 23px; }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.12rem, 2.5vw, 1.4rem);
+      letter-spacing: -.035em;
+    }
+
+    .brand p { margin: 2px 0 0; color: var(--muted); font-size: .88rem; }
+
+    .top-actions { display: flex; align-items: center; gap: 9px; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 42px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 650;
+      font-size: .9rem;
+      text-decoration: none;
+      transition: background .18s ease, border-color .18s ease, transform .18s ease;
+    }
+
+    .button:hover { background: var(--surface-hover); border-color: #526887; }
+    .button:active { transform: translateY(1px); }
+    .button svg { width: 17px; height: 17px; }
+    .button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .button.primary:hover { background: #c0d8ff; }
+    .button.ghost { background: transparent; }
+    .button.danger { color: var(--danger); }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(24px, 5vw, 42px);
+      margin-bottom: 22px;
+      border: 1px solid #304666;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 90% 20%, rgba(139, 180, 255, .17), transparent 17rem),
+        linear-gradient(120deg, rgba(27, 49, 82, .96), rgba(17, 26, 45, .96));
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #bad4ff;
+      text-transform: uppercase;
+      letter-spacing: .13em;
+      font-size: .72rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: #8fc3ff; box-shadow: 0 0 0 4px rgba(143, 195, 255, .12); }
+
+    .hero h2 {
+      max-width: 700px;
+      margin: 0;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -.055em;
+    }
+
+    .hero p {
+      max-width: 580px;
+      margin: 14px 0 0;
+      color: #c0cde0;
+      font-size: clamp(.94rem, 2vw, 1.05rem);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0 30px;
+    }
+
+    .search-wrap { position: relative; flex: 1; min-width: 0; }
+    .search-wrap > svg {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 19px;
+      height: 19px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search {
+      width: 100%;
+      min-height: 50px;
+      padding: 13px 16px 13px 46px;
+      color: var(--text);
+      background: rgba(17, 26, 45, .88);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      outline: none;
+      box-shadow: 0 5px 20px rgba(0,0,0,.08);
+    }
+
+    .search::placeholder { color: #7f91ad; }
+    .search:focus, .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--accent-strong);
+      box-shadow: 0 0 0 3px rgba(118, 170, 255, .12);
+    }
+
+    .result-count { white-space: nowrap; color: var(--muted); font-size: .84rem; }
+
+    .category { margin: 0 0 34px; }
+    .category-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .category-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: -.02em;
+    }
+
+    .category-symbol {
+      display: grid;
+      place-items: center;
+      width: 35px;
+      height: 35px;
+      border-radius: 11px;
+      background: #1b2a42;
+      color: var(--accent);
+    }
+
+    .category-symbol svg { width: 18px; height: 18px; }
+    .category-count { color: var(--muted); font-size: .8rem; }
+
+    .link-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 13px;
+    }
+
+    .link-card {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 16px;
+      text-decoration: none;
+      background: rgba(17, 26, 45, .88);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .link-card:hover {
+      transform: translateY(-3px);
+      background: var(--surface-raised);
+      border-color: #526887;
+    }
+
+    .link-card:focus-visible, .button:focus-visible, .icon-choice:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .link-icon {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      flex: 0 0 auto;
+      border: 1px solid #3a4b66;
+      border-radius: 13px;
+      background: #22334c;
+      color: #bdd6ff;
+    }
+
+    .link-icon svg { width: 21px; height: 21px; }
+    .link-icon .emoji { font-size: 1.35rem; line-height: 1; }
+
+    .link-info { flex: 1; min-width: 0; }
+    .link-info strong {
+      display: block;
+      margin-bottom: 3px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: .93rem;
+      font-weight: 750;
+    }
+
+    .link-info small {
+      display: -webkit-box;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.45;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .card-actions { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .card-action {
+      display: grid;
+      place-items: center;
+      width: 27px;
+      height: 27px;
+      padding: 0;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #8193ae;
+    }
+    .card-action:hover { color: var(--text); background: #30415b; }
+    .card-action svg { width: 15px; height: 15px; }
+    .favorite.active { color: #ffd479; }
+
+    .empty-state {
+      display: none;
+      padding: 48px 20px;
+      text-align: center;
+      background: rgba(17, 26, 45, .6);
+      border: 1px dashed var(--border);
+      border-radius: 18px;
+      color: var(--muted);
+    }
+    .empty-state.show { display: block; }
+    .empty-state svg { width: 30px; height: 30px; margin-bottom: 8px; color: var(--accent); }
+    .empty-state strong { display: block; color: var(--text); margin-bottom: 4px; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 22px 0 4px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .footer-right { display: flex; align-items: center; gap: 7px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #6ee7a1; }
+
+    dialog {
+      width: min(560px, calc(100% - 28px));
+      max-height: min(90vh, 780px);
+      padding: 0;
+      overflow: auto;
+      color: var(--text);
+      background: #111a2d;
+      border: 1px solid #3a4b66;
+      border-radius: 20px;
+      box-shadow: 0 30px 100px rgba(0,0,0,.55);
+    }
+
+    dialog::backdrop { background: rgba(3, 7, 18, .75); backdrop-filter: blur(5px); }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-head h2 { margin: 0 0 4px; font-size: 1.2rem; }
+    .modal-head p { margin: 0; color: var(--muted); font-size: .86rem; }
+    .close-button { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 10px; color: var(--text); background: transparent; }
+    .close-button svg { width: 18px; height: 18px; }
+
+    form { padding: 22px 24px 24px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { color: #d9e5f7; font-size: .84rem; font-weight: 700; }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      min-height: 43px;
+      padding: 10px 12px;
+      color: var(--text);
+      background: #0b1222;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+    }
+    .field textarea { min-height: 78px; resize: vertical; }
+    .help { color: var(--muted); font-size: .75rem; line-height: 1.45; }
+
+    .icon-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+    .icon-choice {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #0b1222;
+      color: var(--muted);
+    }
+    .icon-choice svg { width: 18px; height: 18px; }
+    .icon-choice .emoji { font-size: 1.2rem; }
+    .icon-choice.selected { border-color: var(--accent); color: var(--accent); background: #1c2c45; box-shadow: 0 0 0 2px rgba(165,200,255,.1); }
+
+    .form-error { display: none; padding: 10px 12px; margin-top: 14px; border: 1px solid #7f3d4a; border-radius: 10px; color: #ffc3c8; background: #321923; font-size: .83rem; }
+    .form-error.show { display: block; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 22px; }
+
+    .toast {
+      position: fixed;
+      z-index: 20;
+      right: 20px;
+      bottom: 20px;
+      max-width: min(420px, calc(100% - 40px));
+      padding: 13px 16px;
+      color: var(--text);
+      background: #20334e;
+      border: 1px solid #4c688c;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 850px) {
+      .link-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 580px) {
+      .shell { width: min(100% - 24px, 1120px); padding-top: 22px; }
+      .topbar { align-items: flex-start; }
+      .brand p { max-width: 200px; }
+      .top-actions .button-label { display: none; }
+      .top-actions .button { width: 43px; padding: 0; }
+      .hero { border-radius: 19px; }
+      .toolbar { align-items: stretch; flex-wrap: wrap; }
+      .search-wrap { flex-basis: 100%; }
+      .result-count { padding-left: 2px; }
+      .link-grid { grid-template-columns: 1fr; }
+      .link-card { padding: 14px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      form { padding: 18px; }
+      .modal-head { padding: 18px; }
+      footer { align-items: flex-start; flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark"><i data-lucide="layout-dashboard"></i></div>
+        <div>
+          <h1 id="dashboardTitle">My Dashboard</h1>
+          <p>Your digital space, all in one place.</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="button ghost" id="exportButton" type="button" title="Export your links">
+          <i data-lucide="download"></i><span class="button-label">Export</span>
+        </button>
+        <button class="button primary" id="addButton" type="button">
+          <i data-lucide="plus"></i><span class="button-label">Add link</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow"><span class="dot"></span> Your personal home base</div>
+      <h2>What are we working on?</h2>
+      <p>One place for the websites, tools, and resources you use every day. Add your favorites and make this space your own.</p>
+    </section>
+
+    <section class="toolbar" aria-label="Search links">
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input class="search" id="searchInput" type="search" placeholder="Search links, descriptions, or categories..." autocomplete="off" />
+      </div>
+      <div class="result-count" id="resultCount" aria-live="polite"></div>
+    </section>
+
+    <div id="linkSections"></div>
+
+    <section class="empty-state" id="emptyState">
+      <i data-lucide="search-x"></i>
+      <strong id="emptyTitle">No links found</strong>
+      <span id="emptyMessage">Try another search or add a new link.</span>
+      <div style="margin-top:16px">
+        <button class="button primary" id="emptyAddButton" type="button"><i data-lucide="plus"></i>Add a link</button>
+      </div>
+    </section>
+
+    <footer>
+      <span>My Dashboard · Made for your workflow</span>
+      <span class="footer-right"><span class="status-dot"></span> Saved in this browser</span>
+    </footer>
+  </main>
+
+  <dialog id="linkDialog" aria-labelledby="dialogTitle">
+    <div class="modal-head">
+      <div>
+        <h2 id="dialogTitle">Add a link</h2>
+        <p>Save a favorite website or resource to your dashboard.</p>
+      </div>
+      <button class="close-button" id="closeDialogButton" type="button" aria-label="Close dialog"><i data-lucide="x"></i></button>
+    </div>
+    <form id="linkForm">
+      <input type="hidden" id="editingId" />
+      <div class="form-grid">
+        <div class="field full">
+          <label for="linkTitle">Link title *</label>
+          <input id="linkTitle" name="title" maxlength="70" placeholder="e.g. My university portal" required />
+        </div>
+        <div class="field full">
+          <label for="linkUrl">Website URL *</label>
+          <input id="linkUrl" name="url" type="text" inputmode="url" maxlength="1000" placeholder="https://example.com" required />
+          <span class="help">Use a full https:// URL, or a relative path to another page in your GitHub Pages site (e.g. tools/index.html).</span>
+        </div>
+        <div class="field">
+          <label for="linkCategory">Category *</label>
+          <input id="linkCategory" name="category" list="categorySuggestions" maxlength="40" placeholder="e.g. Learning" required />
+          <datalist id="categorySuggestions">
+            <option value="Learning & Education"></option>
+            <option value="Finance & Research"></option>
+            <option value="Projects & Work"></option>
+            <option value="Productivity"></option>
+            <option value="Useful Websites"></option>
+          </datalist>
+        </div>
+        <div class="field">
+          <label for="linkDescription">Short description</label>
+          <input id="linkDescription" name="description" maxlength="120" placeholder="What do you use it for?" />
+        </div>
+        <div class="field full">
+          <label>Choose an icon</label>
+          <div class="icon-picker" id="iconPicker" aria-label="Choose a link icon"></div>
+          <span class="help">Pick a Lucide icon or emoji to make the link easy to recognize.</span>
+        </div>
+      </div>
+      <div class="form-error" id="formError" role="alert"></div>
+      <div class="modal-actions">
+        <button class="button" id="cancelButton" type="button">Cancel</button>
+        <button class="button primary" type="submit"><i data-lucide="check"></i><span id="saveButtonText">Save link</span></button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "personal-dashboard-links-v1";
+      const FAVORITES_KEY = "personal-dashboard-favorites-v1";
+
+      // Edit these default links to make your dashboard personal.
+      // These defaults are built into the page and appear on every device.
+      const defaultLinks = [
+        { id: "default-notion", title: "Notion", url: "https://www.notion.so/", category: "Learning & Education", description: "Notes, plans, and knowledge", icon: "notebook" },
+        { id: "default-scholar", title: "Google Scholar", url: "https://scholar.google.com/", category: "Learning & Education", description: "Academic research and papers", icon: "graduation-cap" },
+        { id: "default-coursera", title: "Coursera", url: "https://www.coursera.org/", category: "Learning & Education", description: "Online courses and new skills", icon: "book-open" },
+        { id: "default-yahoo", title: "Yahoo Finance", url: "https://finance.yahoo.com/", category: "Finance & Research", description: "Market data and stock research", icon: "chart-no-axes-combined" },
+        { id: "default-sec", title: "SEC EDGAR", url: "https://www.sec.gov/edgar/search/", category: "Finance & Research", description: "Company filings and financial reports", icon: "file-text" },
+        { id: "default-colab", title: "Google Colab", url: "https://colab.research.google.com/", category: "Finance & Research", description: "Python notebooks and data analysis", icon: "code" },
+        { id: "default-drive", title: "Google Drive", url: "https://drive.google.com/", category: "Projects & Work", description: "Documents and project files", icon: "cloud" },
+        { id: "default-github", title: "GitHub", url: "https://github.com/", category: "Projects & Work", description: "Code and development projects", icon: "github" },
+        { id: "default-figma", title: "Figma", url: "https://www.figma.com/", category: "Projects & Work", description: "Design and creative work", icon: "palette" },
+        { id: "default-chatgpt", title: "ChatGPT", url: "https://chatgpt.com/", category: "Productivity", description: "Research, learning, and ideas", icon: "bot" },
+        { id: "default-calendar", title: "Google Calendar", url: "https://calendar.google.com/", category: "Productivity", description: "Schedule and organize your days", icon: "calendar-days" },
+        { id: "default-deepl", title: "DeepL", url: "https://www.deepl.com/", category: "Useful Websites", description: "Translation and language tools", icon: "languages" }
+      ];
+
+      const iconNames = [
+        "globe", "book-open", "notebook", "graduation-cap", "book-mark",
+        "chart-no-axes-combined", "chart-line", "calculator", "file-text",
+        "code", "cloud", "github", "palette", "bot", "calendar-days",
+        "languages", "briefcase-business", "music", "map", "heart",
+        "lightbulb", "video", "mail", "message-circle", "folder", "star",
+        "coffee", "flask-conical", "landmark", "newspaper"
+      ];
+      const emojiIcons = ["📚", "🌍", "💡", "🎯", "🎨", "💻", "📈", "☕", "🎓", "🧠", "🎵", "✈️"];
+
+      const categoryIconMap = {
+        "learning & education": "book-open",
+        "finance & research": "chart-no-axes-combined",
+        "projects & work": "briefcase-business",
+        "productivity": "zap",
+        "useful websites": "globe",
+        "favorites": "star"
+      };
+
+      const $ = (selector) => document.querySelector(selector);
+      const linkSections = $("#linkSections");
+      const searchInput = $("#searchInput");
+      const resultCount = $("#resultCount");
+      const emptyState = $("#emptyState");
+      const dialog = $("#linkDialog");
+      const form = $("#linkForm");
+      const formError = $("#formError");
+      const iconPicker = $("#iconPicker");
+      let selectedIcon = "globe";
+      let selectedIconType = "lucide";
+      let toastTimer;
+
+      function safeRead(key, fallback) {
+        try {
+          const value = localStorage.getItem(key);
+          return value ? JSON.parse(value) : fallback;
+        } catch (error) {
+          return fallback;
+        }
+      }
+
+      function loadCustomLinks() {
+        const saved = safeRead(STORAGE_KEY, []);
+        return Array.isArray(saved) ? saved.filter(isValidStoredLink) : [];
+      }
+
+      function isValidStoredLink(link) {
+        return link && typeof link.id === "string" &&
+          typeof link.title === "string" && typeof link.url === "string" &&
+          typeof link.category === "string" && typeof link.icon === "string";
+      }
+
+      let customLinks = loadCustomLinks();
+      let favorites = safeRead(FAVORITES_KEY, []);
+      if (!Array.isArray(favorites)) favorites = [];
+
+      function saveCustomLinks() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(customLinks));
+          return true;
+        } catch (error) {
+          showToast("Could not save in this browser. Check storage settings.");
+          return false;
+        }
+      }
+
+      function saveFavorites() {
+        try {
+          localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+        } catch (error) {
+          showToast("Could not save favorites in this browser.");
+        }
+      }
+
+      function allLinks() {
+        return [...defaultLinks, ...customLinks];
+      }
+
+      function safeIconName(name) {
+        return iconNames.includes(name) || defaultLinks.some(link => link.icon === name) ? name : "globe";
+      }
+
+      function iconMarkup(name, type = "lucide") {
+        if (type === "emoji" || emojiIcons.includes(name)) {
+          return `<span class="emoji" aria-hidden="true">${escapeHTML(name)}</span>`;
+        }
+        const icon = safeIconName(name);
+        return `<i data-lucide="${escapeHTML(icon)}"></i>`;
+      }
+
+      function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, character => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        })[character]);
+      }
+
+      function normalizeUrl(raw) {
+        const value = raw.trim();
+        if (!value) return null;
+        // Relative paths are useful for other pages inside the same GitHub Pages site.
+        if (value.startsWith("/") || value.startsWith("./") || value.startsWith("../")) {
+          if (value.startsWith("//")) return null;
+          return value;
+        }
+        try {
+          const parsed = new URL(value.includes("://") ? value : `https://${value}`);
+          if (!["http:", "https:"].includes(parsed.protocol)) return null;
+          return parsed.href;
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function isExternalUrl(url) {
+        return /^https?:\/\//i.test(url);
+      }
+
+      function showToast(message) {
+        const toast = $("#toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+      }
+
+      function render() {
+        const query = searchInput.value.trim().toLowerCase();
+        const links = allLinks();
+        const favoritesOnly = query === "is:favorite";
+        const filtered = links.filter(link => {
+          if (favoritesOnly && !favorites.includes(link.id)) return false;
+          const haystack = `${link.title} ${link.description || ""} ${link.category} ${link.url}`.toLowerCase();
+          return favoritesOnly || haystack.includes(query);
+        });
+
+        const grouped = new Map();
+        filtered.forEach(link => {
+          const category = link.category.trim() || "Other";
+          if (!grouped.has(category)) grouped.set(category, []);
+          grouped.get(category).push(link);
+        });
+
+        // Show Favorites first when there are favorites and the user isn't searching.
+        if (!query && favorites.length) {
+          const favoriteLinks = links.filter(link => favorites.includes(link.id));
+          if (favoriteLinks.length) grouped.set("Favorites", favoriteLinks);
+        }
+
+        linkSections.innerHTML = "";
+        let shown = 0;
+
+        grouped.forEach((items, category) => {
+          // Avoid showing the Favorites category twice as regular category.
+          const uniqueItems = [...new Map(items.map(item => [item.id, item])).values()];
+          if (!uniqueItems.length) return;
+          shown += uniqueItems.length;
+
+          const section = document.createElement("section");
+          section.className = "category";
+          const headingIcon = categoryIconMap[category.toLowerCase()] || "folder";
+          section.innerHTML = `
+            <div class="category-heading">
+              <h2 class="category-title">
+                <span class="category-symbol">${iconMarkup(headingIcon)}</span>
+                <span>${escapeHTML(category)}</span>
+              </h2>
+              <span class="category-count">${uniqueItems.length} ${uniqueItems.length === 1 ? "link" : "links"}</span>
+            </div>
+            <div class="link-grid"></div>
+          `;
+          const grid = section.querySelector(".link-grid");
+
+          uniqueItems.forEach(link => {
+            const isFavorite = favorites.includes(link.id);
+            const card = document.createElement("article");
+            card.className = "link-card";
+            card.innerHTML = `
+              <span class="link-icon">${iconMarkup(link.icon, link.iconType)}</span>
+              <span class="link-info">
+                <strong title="${escapeHTML(link.title)}">${escapeHTML(link.title)}</strong>
+                <small>${escapeHTML(link.description || link.url)}</small>
+              </span>
+              <span class="card-actions">
+                <button class="card-action favorite ${isFavorite ? "active" : ""}" type="button"
+                  title="${isFavorite ? "Remove favorite" : "Add to favorites"}"
+                  aria-label="${isFavorite ? "Remove favorite" : "Add to favorites"}: ${escapeHTML(link.title)}"
+                  data-favorite="${escapeHTML(link.id)}">
+                  <i data-lucide="star"></i>
+                </button>
+                ${link.id.startsWith("default-") ? "" : `
+                  <button class="card-action" type="button" title="Edit link" aria-label="Edit ${escapeHTML(link.title)}" data-edit="${escapeHTML(link.id)}">
+                    <i data-lucide="pencil"></i>
+                  </button>
+                  <button class="card-action" type="button" title="Delete link" aria-label="Delete ${escapeHTML(link.title)}" data-delete="${escapeHTML(link.id)}">
+                    <i data-lucide="trash-2"></i>
+                  </button>
+                `}
+                <a class="card-action" href="${escapeHTML(link.url)}" ${isExternalUrl(link.url) ? 'target="_blank" rel="noopener noreferrer"' : ""} title="Open ${escapeHTML(link.title)}" aria-label="Open ${escapeHTML(link.title)}">
+                  <i data-lucide="arrow-up-right"></i>
+                </a>
+              </span>
+            `;
+            // Clicking the main body of a card opens its destination, except on controls.
+            card.addEventListener("click", event => {
+              if (event.target.closest("button, a")) return;
+              if (isExternalUrl(link.url)) window.open(link.url, "_blank", "noopener,noreferrer");
+              else window.location.href = link.url;
+            });
+            card.style.cursor = "pointer";
+            grid.appendChild(card);
+          });
+          linkSections.appendChild(section);
+        });
+
+        const totalVisible = filtered.length;
+        resultCount.textContent = `${totalVisible} ${totalVisible === 1 ? "link" : "links"}`;
+        emptyState.classList.toggle("show", totalVisible === 0);
+        $("#emptyTitle").textContent = query ? "No links found" : "Your dashboard is empty";
+        $("#emptyMessage").textContent = query
+          ? "Try a different search term or add a new link."
+          : "Add your first link to get started.";
+
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      function buildIconPicker() {
+        iconPicker.innerHTML = "";
+        const choices = [
+          ...iconNames.map(name => ({ name, type: "lucide" })),
+          ...emojiIcons.map(name => ({ name, type: "emoji" }))
+        ];
+        choices.forEach(choice => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "icon-choice";
+          button.dataset.icon = choice.name;
+          button.dataset.type = choice.type;
+          button.title = choice.type === "emoji" ? `Emoji ${choice.name}` : choice.name;
+          button.setAttribute("aria-label", button.title);
+          button.innerHTML = iconMarkup(choice.name, choice.type);
+          button.addEventListener("click", () => {
+            selectedIcon = choice.name;
+            selectedIconType = choice.type;
+            updateIconPicker();
+          });
+          iconPicker.appendChild(button);
+        });
+        updateIconPicker();
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      function updateIconPicker() {
+        iconPicker.querySelectorAll(".icon-choice").forEach(button => {
+          const selected = button.dataset.icon === selectedIcon && button.dataset.type === selectedIconType;
+          button.classList.toggle("selected", selected);
+          button.setAttribute("aria-pressed", String(selected));
+        });
+      }
+
+      function openAddDialog(link = null) {
+        form.reset();
+        formError.classList.remove("show");
+        formError.textContent = "";
+        $("#editingId").value = link ? link.id : "";
+        $("#dialogTitle").textContent = link ? "Edit link" : "Add a link";
+        $("#saveButtonText").textContent = link ? "Save changes" : "Save link";
+        $("#linkTitle").value = link ? link.title : "";
+        $("#linkUrl").value = link ? link.url : "";
+        $("#linkCategory").value = link ? link.category : "Useful Websites";
+        $("#linkDescription").value = link ? (link.description || "") : "";
+        selectedIcon = link ? link.icon : "globe";
+        selectedIconType = link ? (link.iconType || (emojiIcons.includes(link.icon) ? "emoji" : "lucide")) : "lucide";
+        updateIconPicker();
+        if (window.lucide) window.lucide.createIcons();
+        dialog.showModal();
+        setTimeout(() => $("#linkTitle").focus(), 50);
+      }
+
+      function closeDialog() {
+        dialog.close();
+        formError.classList.remove("show");
+      }
+
+      function showFormError(message) {
+        formError.textContent = message;
+        formError.classList.add("show");
+      }
+
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        const title = $("#linkTitle").value.trim();
+        const rawUrl = $("#linkUrl").value;
+        const url = normalizeUrl(rawUrl);
+        const category = $("#linkCategory").value.trim();
+        const description = $("#linkDescription").value.trim();
+        const editingId = $("#editingId").value;
+
+        if (!title || !rawUrl.trim() || !category) {
+          showFormError("Please fill in the title, URL, and category.");
+          return;
+        }
+        if (!url) {
+          showFormError("Enter a valid http:// or https:// URL, or a relative path like tools/index.html.");
+          return;
+        }
+        if (/^(javascript|data|file):/i.test(url)) {
+          showFormError("That URL type is not allowed. Please use a web URL or relative page path.");
+          return;
+        }
+
+        if (editingId && editingId.startsWith("default-")) {
+          showFormError("Default links are edited in the defaultLinks array in index.html.");
+          return;
+        }
+
+        const link = {
+          id: editingId || `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          title, url, category, description,
+          icon: selectedIcon, iconType: selectedIconType
+        };
+
+        if (editingId) {
+          customLinks = customLinks.map(existing => existing.id === editingId ? link : existing);
+        } else {
+          customLinks.push(link);
+        }
+
+        if (!saveCustomLinks()) return;
+        closeDialog();
+        render();
+        showToast(editingId ? "Link updated." : "Link added to your dashboard.");
+      });
+
+      $("#addButton").addEventListener("click", () => openAddDialog());
+      $("#emptyAddButton").addEventListener("click", () => openAddDialog());
+      $("#closeDialogButton").addEventListener("click", closeDialog);
+      $("#cancelButton").addEventListener("click", closeDialog);
+      dialog.addEventListener("click", event => {
+        if (event.target === dialog) closeDialog();
+      });
+      searchInput.addEventListener("input", render);
+
+      linkSections.addEventListener("click", event => {
+        const favoriteButton = event.target.closest("[data-favorite]");
+        const editButton = event.target.closest("[data-edit]");
+        const deleteButton = event.target.closest("[data-delete]");
+
+        if (favoriteButton) {
+          const id = favoriteButton.dataset.favorite;
+          favorites = favorites.includes(id) ? favorites.filter(item => item !== id) : [...favorites, id];
+          saveFavorites();
+          render();
+          showToast(favorites.includes(id) ? "Added to favorites." : "Removed from favorites.");
+          return;
+        }
+
+        if (editButton) {
+          const link = customLinks.find(item => item.id === editButton.dataset.edit);
+          if (link) openAddDialog(link);
+          return;
+        }
+
+        if (deleteButton) {
+          const link = customLinks.find(item => item.id === deleteButton.dataset.delete);
+          if (!link) return;
+          if (confirm(`Delete "${link.title}" from this browser's dashboard?`)) {
+            customLinks = customLinks.filter(item => item.id !== link.id);
+            favorites = favorites.filter(item => item !== link.id);
+            saveCustomLinks();
+            saveFavorites();
+            render();
+            showToast("Link deleted.");
+          }
+        }
+      });
+
+      $("#exportButton").addEventListener("click", () => {
+        const payload = {
+          exportedAt: new Date().toISOString(),
+          customLinks,
+          favorites
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = "my-dashboard-links.json";
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+        showToast("Exported your custom links as a JSON backup.");
+      });
+
+      buildIconPicker();
+      render();
+
+      // Lucide is deferred; initialize icons when it is ready.
+      if (window.lucide) window.lucide.createIcons();
+      else window.addEventListener("load", () => {
+        if (window.lucide) window.lucide.createIcons();
+      });
+    })();
+  </script>
+</body>
+</html>
